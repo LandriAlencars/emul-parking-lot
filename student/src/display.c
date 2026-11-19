@@ -126,7 +126,8 @@ int display_format_amount(char *buf, size_t size, uint32_t centavos)
 	int n = snprintf(buf, size, "BRL %u.%02u", (unsigned int)(centavos / 100U),
 			 (unsigned int)(centavos % 100U));
 
-	return (n > 0 && (size_t)n < size) ? n : -1;
+	/* n negativo (erro) vira um size_t enorme e também cai em -1. */
+	return ((size_t)n < size) ? n : -1;
 }
 
 int display_show_plate(const char *plate)

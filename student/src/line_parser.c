@@ -26,7 +26,9 @@ static int finish(struct line_parser *lp)
 	if (lp->ending == LINE_CRLF) {
 		/* O último byte antes do LF precisa ser o CR (e é o único CR). */
 		ok = ok && body > 0U && lp->buf[body - 1U] == '\r';
-		body = (body > 0U) ? body - 1U : 0U;
+		if (ok) {
+			body--; /* tira o CR */
+		}
 	}
 	ok = ok && body > 0U; /* linha vazia não é um quadro */
 

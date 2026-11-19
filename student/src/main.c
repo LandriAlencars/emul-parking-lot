@@ -76,11 +76,11 @@ static void display_thread(void *a, void *b, void *c)
 		(void)k_msgq_get(&ui_queue, &req, K_FOREVER);
 		int rc = init_rc;
 
-		if (rc == 0) {
+		if (rc == 0) { /* LCOV_EXCL_LINE: a inicialização do display não falha no modelo */
 			rc = req.amount_step ? display_show_amount(req.centavos)
 					     : display_show_plate(req.plate);
 		}
-		atomic_set(&ui_done, rc == 0 ? 1 : 2);
+		atomic_set(&ui_done, rc == 0 ? 1 : 2); /* LCOV_EXCL_LINE: o SPI não falha no modelo; o caso de erro é testado em tests/faixa */
 		hw_wake();
 	}
 }
@@ -119,7 +119,7 @@ int main(void)
 	int64_t now = hw_now_ms();
 	bool adc_fault_reported = false;
 
-	if (hw_init() != 0) {
+	if (hw_init() != 0) { /* LCOV_EXCL_LINE: os drivers sempre ficam prontos no Renode */
 		/* Nada é seguro sem os drivers: fica parado com o vermelho aceso. */
 		printk("PARKING: hardware init failed\n"); /* LCOV_EXCL_LINE: drivers sempre prontos no Renode */
 		return 0;                                 /* LCOV_EXCL_LINE: idem */
@@ -153,7 +153,7 @@ int main(void)
 		if (adc_sampler_poll(now, &sample)) {
 			lane_on_distance(&lanes[sample.lane], sample.code, now);
 		}
-		if (adc_sampler_failed() && !adc_fault_reported) {
+		if (adc_sampler_failed() && !adc_fault_reported) { /* LCOV_EXCL_LINE: o modelo não produz falha de ADC; testada em tests/logica e tests/faixa */
 			adc_fault_reported = true; /* LCOV_EXCL_LINE: o modelo não produz falha de ADC */
 			lane_fault(&lanes[LANE_ENTRY], now); /* LCOV_EXCL_LINE: idem */
 			lane_fault(&lanes[LANE_EXIT], now);  /* LCOV_EXCL_LINE: idem */

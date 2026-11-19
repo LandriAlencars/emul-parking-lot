@@ -86,6 +86,13 @@ ZTEST(line_parser, test_quadro_longo_descartado_ate_lf)
 	feed(&lp, longa, 0);
 	zassert_equal(line_parser_feed(&lp, '\n', 0), -1);
 	zassert_equal(feed(&lp, "OK\n", 0), 2, "a linha seguinte vale");
+	/* Já descartando: o prazo de montagem não muda nada. */
+	memset(longa, 'A', 150);
+	longa[150] = '\0';
+	feed(&lp, longa, 0);
+	line_parser_poll(&lp, 5000);
+	zassert_true(lp.discarding);
+	zassert_equal(feed(&lp, "\nOK\n", 5000), 2);
 }
 
 ZTEST(line_parser, test_prazo_de_montagem)

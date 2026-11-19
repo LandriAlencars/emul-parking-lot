@@ -68,7 +68,8 @@ bool parse_canonical_u32(const char *s, size_t len, uint32_t min, uint32_t max,
 /** snprintf com verificação de truncamento: devolve o comprimento ou -1. */
 static int checked_len(int n, size_t size)
 {
-	return (n > 0 && (size_t)n < size) ? n : -1;
+	/* n negativo (erro) vira um size_t enorme e também cai em -1. */
+	return ((size_t)n < size) ? n : -1;
 }
 
 int camera_format_capture(char *buf, size_t size, uint32_t capture_id)

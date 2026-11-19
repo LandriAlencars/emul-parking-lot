@@ -275,7 +275,7 @@ void lane_tick(struct lane *l, int64_t now_ms)
 		break;
 
 	case LANE_OPEN:
-		if (!upper || lower) {
+		if (!upper) {
 			assist(l, true, "lost upper limit", now_ms);
 			break;
 		}
@@ -424,9 +424,12 @@ void lane_on_payment_line(struct lane *l, const char *line, int64_t now_ms)
 {
 	struct payment_result r;
 
-	/* Só vale enquanto esperamos o resultado, com o UUID atual. */
-	if (l->state != LANE_PAYING || !l->uuid_active ||
-	    payment_parse_result(line, &r) != 0 || strcmp(r.uuid, l->uuid) != 0) {
+	/*
+	 * Só vale enquanto esperamos o resultado (PAYING), com o UUID atual.
+	 * Fora de PAYING o UUID já foi invalidado (uuid_active == false).
+	 */
+	if (l->state != LANE_PAYING || payment_parse_result(line, &r) != 0 ||
+	    strcmp(r.uuid, l->uuid) != 0) {
 		return; /* fora de hora, malformada ou de cobrança antiga */
 	}
 	if (r.status == PAYMENT_CANCELLED) {

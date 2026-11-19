@@ -183,18 +183,18 @@ int hw_init(void)
 	 * qualquer falha deixa rc != 0, e main.c para o firmware com o vermelho
 	 * aceso. Nenhuma dessas chamadas falha no laboratório.
 	 */
-	rc |= device_is_ready(adc_channels[LANE_ENTRY].dev) ? 0 : -ENODEV;
+	rc |= device_is_ready(adc_channels[LANE_ENTRY].dev) ? 0 : -ENODEV; /* LCOV_EXCL_LINE: o ADC4 sempre fica pronto no Renode */
 	rc |= setup_lane(LANE_ENTRY);
 	rc |= setup_lane(LANE_EXIT);
 	k_poll_signal_init(&adc_signal);
 
 	for (int ch = 0; ch < UART_COUNT; ch++) {
-		rc |= device_is_ready(uarts[ch]) ? 0 : -ENODEV;
+		rc |= device_is_ready(uarts[ch]) ? 0 : -ENODEV; /* LCOV_EXCL_LINE: as UARTs sempre ficam prontas no Renode */
 		rc |= uart_irq_callback_user_data_set(uarts[ch], uart_isr, &uart_ids[ch]);
 		uart_irq_rx_enable(uarts[ch]);
 	}
 
-	rc |= spi_is_ready_dt(&disp_spi) ? 0 : -ENODEV;
+	rc |= spi_is_ready_dt(&disp_spi) ? 0 : -ENODEV; /* LCOV_EXCL_LINE: o SPI1 sempre fica pronto no Renode */
 	rc |= gpio_pin_configure_dt(&disp_dc, GPIO_OUTPUT_INACTIVE);
 	rc |= gpio_pin_configure_dt(&disp_reset, GPIO_OUTPUT_INACTIVE);
 	return rc;

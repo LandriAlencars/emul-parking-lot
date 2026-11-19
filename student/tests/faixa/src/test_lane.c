@@ -350,6 +350,10 @@ ZTEST(lane, test_rearme_exige_cancela_fechada)
 	lower = false;
 	lane_on_distance(&lane, 2000, now);
 	zassert_equal(lane.state, LANE_ASSIST);
+	upper = true;
+	lower = true; /* contraditório: também não rearma */
+	lane_on_distance(&lane, 2000, now);
+	zassert_equal(lane.state, LANE_ASSIST);
 }
 
 ZTEST(lane, test_prazo_da_camera)
@@ -738,6 +742,17 @@ ZTEST(lane, test_tarifa_acima_de_9999_unidades)
 	lane_on_display_done(&lane, true, now);
 	zassert_equal(lane.state, LANE_ASSIST);
 	zassert_equal(ui_request_amount_fake.call_count, 0);
+}
+
+ZTEST(lane, test_sessao_sumiu_antes_da_tarifa)
+{
+	zassert_ok(sessions_add("ABC1D23", 0));
+	boot(LANE_EXIT);
+	arrive("ABC1D23");
+	zassert_ok(sessions_remove("ABC1D23"));
+	lane_on_display_done(&lane, true, now);
+	zassert_equal(lane.state, LANE_ASSIST);
+	zassert_equal(tx_count[UART_PAYMENT], 0);
 }
 
 ZTEST(lane, test_pagamento_fora_de_hora_ignorado)
